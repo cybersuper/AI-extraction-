@@ -1,0 +1,142 @@
+<div style="display: flex; gap: 24px; padding: 25px; font-family: system-ui, sans-serif; background-color: #0f172a; color: #f1f5f9; min-height: 100vh;">
+  
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+    
+    <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 15px;">Section 1 : Pipeline d'Ingestion</h3>
+      
+      <input type="file" #fileInput (change)="onFileSelected($event)" accept="application/pdf" style="display: none;">
+
+      <div (click)="fileInput.click()" style="border: 2px dashed #38bdf8; padding: 25px; text-align: center; border-radius: 6px; cursor: pointer; background: #0f172a;">
+        <p *ngIf="!fileUploaded && !isAnalyzing" style="margin:0; font-size:14px;">📁 Cliquez pour choisir un document <strong>PDF</strong></p>
+        <p *ngIf="fileUploaded && !isAnalyzing" style="color: #4ade80; margin: 0; font-weight: bold;">✓ Extraction Vision AI Complétée</p>
+        
+        <div *ngIf="isAnalyzing" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;">
+          <div style="border: 3px solid #334155; border-top: 3px solid #fbbf24; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite;"></div>
+          <span style="font-size: 14px; color: #fbbf24; font-weight: bold;">Analyse et extraction par l'IA en cours...</span>
+        </div>
+
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      </div>
+    </div>
+
+    <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 15px;">Section 2 : Informations du Document</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:4px;">Date</label>
+          <input type="date" [(ngModel)]="reportData.productionDate" style="width: 90%; padding: 8px; background: #0f172a; border: 1px solid #475569; color: #fff; border-radius: 4px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:4px;">Unitée</label>
+          <input type="text" [(ngModel)]="reportData.productionUnit" style="width: 90%; padding: 8px; background: #0f172a; border: 1px solid #475569; color: #fff; border-radius: 4px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:4px;">Poste</label>
+          <select [(ngModel)]="reportData.shift" style="width: 95%; padding: 8px; background: #0f172a; border: 1px solid #475569; color: #fff; border-radius: 4px;">
+            <option value="Matin">Matin</option>
+            <option value="Soir">Soir</option>
+            <option value="Nuit">Nuit</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 15px;">Section 3 : Métriques Déduites des Notes</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:#cbd5e1;">Depart EMB :</span>
+          <input type="number" [(ngModel)]="reportData.departEmb" placeholder="vide" style="width: 80px; padding: 6px; background: #0f172a; border: 1px solid #475569; color:#fff; text-align:center;">
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:#cbd5e1;">Reste EMB :</span>
+          <input type="number" [(ngModel)]="reportData.resteEmb" placeholder="vide" style="width: 80px; padding: 6px; background: #0f172a; border: 1px solid #475569; color:#fff; text-align:center;">
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:#cbd5e1;">Deuxième EMB :</span>
+          <input type="number" [(ngModel)]="reportData.deuxiemeEmb" placeholder="vide" style="width: 80px; padding: 6px; background: #0f172a; border: 1px solid #475569; color:#fff; text-align:center;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 2.5; display: flex; flex-direction: column; gap: 20px;">
+    
+    <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155; flex-grow: 1;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; color: #38bdf8; font-size: 16px;">Section 4 : Grille d'Ajustement et de Validation</h3>
+        <button (click)="submitVerifiedData()" [disabled]="reportData.wagons.length === 0" style="background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+          Valider et Transmettre
+        </button>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="background: #0f172a; color: #94a3b8; text-align: center;">
+            <th style="padding: 10px; border: 1px solid #334155; width: 40px;">Ligne</th>
+            <th style="padding: 10px; border: 1px solid #334155;">N° Wagon</th>
+            <th style="padding: 10px; border: 1px solid #334155;">Produit</th>
+            <th style="padding: 10px; border: 1px solid #334155; background: #1e1b4b; color: #c084fc;">Symbole Emballé</th>
+            <th style="padding: 10px; border: 1px solid #334155; background: #111827;">Qté Emballée</th>
+            <th style="padding: 10px; border: 1px solid #334155; background: #1e1b4b; color: #c084fc;">Symbole VRAC</th>
+            <th style="padding: 10px; border: 1px solid #334155; background: #111827;">Qté VRAC</th>
+<!--             <th style="padding: 10px; border: 1px solid #334155;">Motif d'arrêt</th>
+            <th style="padding: 10px; border: 1px solid #334155;">Temps d'arrêt</th> -->
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of reportData.wagons; trackBy: trackByLine" style="background: #1e293b; text-align: center;">
+            <td style="padding: 8px; border: 1px solid #334155; color: #64748b; font-weight: bold;">{{ row.line }}</td>
+            <td style="border: 1px solid #334155;"><input type="text" [(ngModel)]="row.wagonNumber" style="width:85%; background:transparent; border:none; color:#fff; text-align:center;"></td>
+            <td style="border: 1px solid #334155;"><input type="text" [(ngModel)]="row.produitCode" style="width:85%; background:transparent; border:none; color:#fff; text-align:center;"></td>
+            
+            <td style="border: 1px solid #334155; background: #2e1065;"><input type="text" [(ngModel)]="row.packedSymbol" style="width:85%; background:transparent; border:none; color:#e9d5ff; text-align:center; font-weight:bold;"></td>
+            <td style="border: 1px solid #334155; background: #030712;"><input type="number" [(ngModel)]="row.packedQuantity" style="width:85%; background:transparent; border:none; color:#34d399; text-align:center;"></td>
+            <td style="border: 1px solid #334155; background: #2e1065;"><input type="text" [(ngModel)]="row.bulkSymbol" style="width:85%; background:transparent; border:none; color:#e9d5ff; text-align:center; font-weight:bold;"></td>
+            <td style="border: 1px solid #334155; background: #030712;"><input type="number" [(ngModel)]="row.bulkQuantity" style="width:85%; background:transparent; border:none; color:#34d399; text-align:center;"></td>
+            
+            <!-- <td style="border: 1px solid #334155;"><input type="text" [(ngModel)]="row.stopReason" style="width:90%; background:transparent; border:none; color:#fff;"></td>
+            <td style="border: 1px solid #334155;"><input type="text" [(ngModel)]="row.stopDuration" style="width:85%; background:transparent; border:none; color:#fff; text-align:center;"></td> -->
+          </tr>
+          <tr *ngIf="reportData.wagons.length === 0">
+            <td colspan="9" style="text-align: center; padding: 45px; color: #64748b;">Aucune donnée chargée. Cliquez sur la zone de la Section 1 pour alimenter la grille.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 15px; margin-bottom: 12px;">Section 5 : Métriques Pied de Page (Fiche)</h3>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+        <div>
+          <label style="font-size: 11px; color:#94a3b8; display:block; margin-bottom:4px;">Stck Wgs Initial</label>
+          <input type="number" [(ngModel)]="reportData.stockWagonsInitial" style="width:85%; padding:6px; background:#0f172a; border:1px solid #475569; color:#fff; text-align:center;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color:#94a3b8; display:block; margin-bottom:4px;">Stck Wgs Final</label>
+          <input type="number" [(ngModel)]="reportData.stockWagonsFinal" style="width:85%; padding:6px; background:#0f172a; border:1px solid #475569; color:#fff; text-align:center;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color:#94a3b8; display:block; margin-bottom:4px;">Nbre Paquets Initial</label>
+          <input type="number" [(ngModel)]="reportData.initialPackets" style="width:85%; padding:6px; background:#0f172a; border:1px solid #475569; color:#fff; text-align:center;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color:#94a3b8; display:block; margin-bottom:4px;">Nbre Paquets Final</label>
+          <input type="number" [(ngModel)]="reportData.finalPackets" style="width:85%; padding:6px; background:#0f172a; border:1px solid #475569; color:#fff; text-align:center;">
+        </div>
+      </div>
+    </div>
+
+    <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 15px; margin-bottom: 6px;">Section 6 : Notes & Demandes d'INTERVENTIONS</h3>
+      <textarea [(ngModel)]="reportData.notes" rows="3" style="width: 97%; background: #0f172a; border: 1px solid #475569; color:#fff; padding: 10px; border-radius:4px; resize:none; font-family: inherit;"></textarea>
+    </div>
+
+  </div>
+</div>
